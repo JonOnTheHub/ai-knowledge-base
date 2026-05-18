@@ -7,15 +7,15 @@ interface Chunk {
 
 export default function SourceChunks({ chunks }: { chunks: Chunk[] }) {
     return (
-        <div className="mt-4 space-y-2">
-            <p className="text-xs font-medium text-zinc-400 uppercase tracking-widest">Sources</p>
+        <div className="mt-3 space-y-2">
+            <p className="text-[10px] font-medium text-zinc-600 uppercase tracking-widest">Sources</p>
             {chunks.map((chunk, i) => (
-                <div key={i} className="border-l-2 border-zinc-100 pl-3 py-1">
+                <div key={i} className="border-l border-zinc-800 pl-3 py-0.5">
                     <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs text-zinc-400">{chunk.filename} · chunk {chunk.chunk_index + 1}</span>
-                        <span className="text-xs tabular-nums text-zinc-300">{(chunk.similarity * 100).toFixed(1)}%</span>
+                        <span className="text-[11px] text-zinc-600">{chunk.filename} · chunk {chunk.chunk_index + 1}</span>
+                        <span className="text-[11px] tabular-nums text-zinc-700">{(chunk.similarity * 100).toFixed(1)}%</span>
                     </div>
-                    <p className="text-xs text-zinc-500 leading-relaxed line-clamp-3">{chunk.chunk_text}</p>
+                    <p className="text-[11px] text-zinc-600 leading-relaxed line-clamp-2">{chunk.chunk_text}</p>
                 </div>
             ))}
         </div>
