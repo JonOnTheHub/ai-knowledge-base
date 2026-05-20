@@ -1,10 +1,10 @@
-create extension if not exists vector;
+drop table if exists documents;
 
 create table documents (
   id uuid primary key default gen_random_uuid(),
   filename text not null,
   chunk_text text not null,
-  embedding vector(384),
+  embedding vector(512),
   chunk_index integer not null,
   upload_id uuid not null default gen_random_uuid(),
   created_at timestamp with time zone default now()
@@ -15,7 +15,7 @@ using ivfflat (embedding vector_cosine_ops)
 with (lists = 100);
 
 create or replace function match_documents(
-  query_embedding vector(384),
+  query_embedding vector(512),
   match_count int default 5,
   filter_upload_id uuid default null
 )

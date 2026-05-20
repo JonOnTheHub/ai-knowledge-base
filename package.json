@@ -9,7 +9,6 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.2.0",
     "@phosphor-icons/react": "^2.1.10",
     "@supabase/supabase-js": "^2.105.4",
     "@tailwindcss/typography": "^0.5.19",
