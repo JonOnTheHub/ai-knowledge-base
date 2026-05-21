@@ -43,7 +43,7 @@ export default function Home() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-zinc-500">Embeddings</span>
-                  <span className="text-xs text-zinc-300 font-medium">bge-small-en-v1.5</span>
+                  <span className="text-xs text-zinc-300 font-medium">voyage-3-lite</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-zinc-500">Search</span>

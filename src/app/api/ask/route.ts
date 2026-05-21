@@ -1,4 +1,4 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { embedText } from '@/lib/embeddings'
 import { supabase } from '@/lib/supabase'
@@ -9,9 +9,7 @@ export async function POST(req: NextRequest) {
     try {
         const { question, uploadId, history } = await req.json()
 
-        if (!question?.trim()) {
-            return new Response(JSON.stringify({ error: 'No question provided' }), { status: 400 })
-        }
+        if (!question?.trim()) return NextResponse.json({ error: 'No question provided' }, { status: 400 })
 
         const queryEmbedding = await embedText(question)
 
@@ -34,7 +32,6 @@ export async function POST(req: NextRequest) {
             ? chunks.map((c: { chunk_text: string }, i: number) => `[Chunk ${i + 1}]:\n${c.chunk_text}`).join('\n\n')
             : null
 
-        // Build message history for the LLM
         const priorMessages = (history ?? []).map((m: { role: string; content: string }) => ({
             role: m.role as 'user' | 'assistant',
             content: m.content,
@@ -66,7 +63,7 @@ No relevant information for this question was found in the uploaded document.
 
 Respond conversationally: clearly tell the user that the document doesn't contain information on this topic, and suggest they try rephrasing the question or asking about something else in the document.`
 
-        const stream = await groq.chat.completions.create({
+        const completion = await groq.chat.completions.create({
             model: 'llama-3.3-70b-versatile',
             messages: [
                 { role: 'system', content: systemPrompt },
@@ -74,43 +71,15 @@ Respond conversationally: clearly tell the user that the document doesn't contai
                 { role: 'user', content: question },
             ],
             temperature: 0.3,
-            stream: true,
         })
 
-        // Stream the response with sources in the first chunk
-        const encoder = new TextEncoder()
-        const readable = new ReadableStream({
-            async start(controller) {
-                // Send sources first as a metadata chunk
-                controller.enqueue(encoder.encode(
-                    `data: ${JSON.stringify({ type: 'sources', sources })}\n\n`
-                ))
+        const answer = completion.choices[0].message.content ?? ''
 
-                for await (const chunk of stream) {
-                    const delta = chunk.choices[0]?.delta?.content
-                    if (delta) {
-                        controller.enqueue(encoder.encode(
-                            `data: ${JSON.stringify({ type: 'delta', content: delta })}\n\n`
-                        ))
-                    }
-                }
-
-                controller.enqueue(encoder.encode('data: [DONE]\n\n'))
-                controller.close()
-            },
-        })
-
-        return new Response(readable, {
-            headers: {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-cache, no-transform',
-                'Connection': 'keep-alive',
-                'X-Accel-Buffering': 'no',
-            },
-        })
+        return NextResponse.json({ answer, sources })
 
     } catch (err) {
-        console.error('[ask]', err)
-        return new Response(JSON.stringify({ error: 'Query failed' }), { status: 500 })
+        const message = err instanceof Error ? err.message : 'Query failed'
+        console.error('[ask]', message)
+        return NextResponse.json({ error: message }, { status: 500 })
     }
 }
