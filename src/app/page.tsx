@@ -58,7 +58,7 @@ export default function Home() {
           )}
         </div>
 
-        <div className="bg-[#18181b] border border-zinc-800 rounded-2xl p-5 md:p-6 h-150 flex flex-col">
+        <div className="relative bg-[#18181b] border border-zinc-800 rounded-2xl p-5 md:p-6 h-150 flex flex-col">
           <ChatInterface key={resetKey} enabled={!!indexed} uploadId={indexed?.uploadId ?? null} />
         </div>
 
