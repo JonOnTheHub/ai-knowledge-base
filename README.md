@@ -1,6 +1,6 @@
 # PaperBase
 
-Upload a PDF. Ask anything about it. Get answers grounded in the document with sources cited.
+Upload PDFs. Ask anything about it. Get answers grounded in the documents with sources cited.
 
 Built without LangChain — every layer of the RAG pipeline is hand-rolled.
 
@@ -8,7 +8,7 @@ Built without LangChain — every layer of the RAG pipeline is hand-rolled.
 
 ## How It Works
 
-1. Upload a PDF → text extracted and split into 500-word chunks (50-word overlap)
+1. Upload PDFs → text extracted and split into 500-word chunks (50-word overlap)
 2. Each chunk converted into a vector via Voyage AI embeddings (512 dims)
 3. Vectors stored in Supabase with pgvector
 4. Ask a question → question vectorised the same way
