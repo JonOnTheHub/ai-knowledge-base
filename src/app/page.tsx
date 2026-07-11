@@ -31,7 +31,7 @@ export default function Home() {
         {/* Left panel */}
         <div className="flex flex-col gap-7 overflow-y-auto md:max-h-[85dvh] pr-1">
           <div className="border-l-2 border-zinc-700 pl-4 shrink-0">
-            <h1 className="text-lg font-semibold tracking-tight text-zinc-100">Knowledge Base</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-zinc-100">Paper Base</h1>
             <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Drop PDFs. Query across all of them.</p>
           </div>
 

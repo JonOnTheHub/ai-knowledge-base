@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Knowledge Base — RAG PDF Chat",
-  description: "Upload a PDF and query it with natural language. Built with Next.js, pgvector, and Groq. MVP.",
+  title: "Paper Base — Upload PDFs and Query",
+  description: "Upload a PDF and query it with natural language. Built with Next.js, pgvector, and Groq. v2.",
 };
 
 export default function RootLayout({
