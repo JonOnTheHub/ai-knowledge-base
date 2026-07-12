@@ -1,12 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractText } from 'unpdf'
+import mammoth from 'mammoth'
 import { chunkText } from '@/lib/chunker'
 import { embedBatch } from '@/lib/embeddings'
 import { supabase } from '@/lib/supabase'
 import { randomUUID } from 'crypto'
 
 const BATCH_SIZE = 500
-const MAX_COMBINED_SIZE = 10 * 1024 * 1024 // 10MB total per session
+const MAX_COMBINED_SIZE = 10 * 1024 * 1024
+const ALLOWED_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+]
+
+async function extractFileText(file: File): Promise<string> {
+  const buffer = await file.arrayBuffer()
+
+  if (file.type === 'application/pdf') {
+    const { text } = await extractText(new Uint8Array(buffer), { mergePages: true })
+    return Array.isArray(text) ? text.join(' ') : text
+  }
+
+  // DOCX
+  const result = await mammoth.extractRawText({ buffer: Buffer.from(buffer) })
+  return result.value
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,8 +36,8 @@ export async function POST(req: NextRequest) {
     if (!files.length) return NextResponse.json({ error: 'No files provided' }, { status: 400 })
 
     for (const file of files) {
-      if (file.type !== 'application/pdf') {
-        return NextResponse.json({ error: `${file.name} is not a PDF` }, { status: 400 })
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        return NextResponse.json({ error: `${file.name} must be a PDF or DOCX` }, { status: 400 })
       }
     }
 
@@ -33,9 +51,7 @@ export async function POST(req: NextRequest) {
     let totalChunks = 0
 
     for (const file of files) {
-      const buffer = new Uint8Array(await file.arrayBuffer())
-      const { text } = await extractText(buffer, { mergePages: true })
-      const rawText = Array.isArray(text) ? text.join(' ') : text
+      const rawText = await extractFileText(file)
 
       if (!rawText?.trim()) {
         return NextResponse.json({ error: `Could not extract text from ${file.name}` }, { status: 422 })

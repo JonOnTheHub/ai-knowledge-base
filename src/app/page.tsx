@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import UploadZone from '@/components/UploadZone'
 import ChatInterface from '@/components/ChatInterface'
 
@@ -9,30 +10,63 @@ interface IndexedFile {
   chunks: number
 }
 
-export default function Home() {
+function Home() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [uploadId, setUploadId] = useState<string | null>(null)
   const [files, setFiles] = useState<IndexedFile[]>([])
   const [totalSize, setTotalSize] = useState(0)
   const [resetKey, setResetKey] = useState(0)
+  const [loadingSession, setLoadingSession] = useState(() => searchParams.get('kb') !== null)
 
-  const handleUpdate = (id: string | null, newFiles: IndexedFile[], size: number) => {
+  useEffect(() => {
+    const urlUploadId = searchParams.get('kb')
+    if (!urlUploadId) return
+
+    fetch(`/api/session?uploadId=${urlUploadId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.exists) {
+          setUploadId(urlUploadId)
+          setFiles(data.files)
+        }
+      })
+      .catch(err => console.error('[session restore]', err))
+      .finally(() => setLoadingSession(false))
+  }, [searchParams])
+
+  const handleUpdate = useCallback((id: string | null, newFiles: IndexedFile[], size: number) => {
     setUploadId(id)
     setFiles(newFiles)
     setTotalSize(size)
-    if (!id) setResetKey(k => k + 1)
-  }
+
+    if (id) {
+      router.replace(`?kb=${id}`, { scroll: false })
+    } else {
+      router.replace('?', { scroll: false })
+      setResetKey(k => k + 1)
+    }
+  }, [router])
 
   const totalChunks = files.reduce((sum, f) => sum + f.chunks, 0)
+
+  if (loadingSession) {
+    return (
+      <main className="min-h-dvh bg-[#111112] flex items-center justify-center">
+        <p className="text-xs text-zinc-600">Loading...</p>
+      </main>
+    )
+  }
 
   return (
     <main className="min-h-dvh bg-[#111112] flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4 md:gap-6 md:items-stretch max-h-[85dvh]">
 
-        {/* Left panel */}
         <div className="flex flex-col gap-7 overflow-y-auto md:max-h-[85dvh] pr-1">
           <div className="border-l-2 border-zinc-700 pl-4 shrink-0">
-            <h1 className="text-lg font-semibold tracking-tight text-zinc-100">Paper Base</h1>
-            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Drop PDFs. Query across all of them.</p>
+            <h1 className="text-lg font-semibold tracking-tight text-zinc-100">Knowledge Base</h1>
+            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Drop PDFs or DOCX. Query across all of them.</p>
           </div>
 
           <UploadZone
@@ -63,16 +97,32 @@ export default function Home() {
                   <span className="text-xs text-zinc-300 font-medium">llama-3.3-70b · Groq</span>
                 </div>
               </div>
+
+              {uploadId && (
+                <div className="pt-3">
+                  <p className="text-[10px] text-zinc-600 mb-1.5">Bookmark this link to return</p>
+                  <div className="text-[10px] text-zinc-500 bg-[#1c1c1f] border border-zinc-800 rounded-lg px-2.5 py-2 truncate">
+                    ?kb={uploadId}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Right panel — chat, matches left panel height, scrolls internally */}
         <div className="relative bg-[#18181b] border border-zinc-800 rounded-2xl p-5 md:p-6 flex flex-col min-h-[420px] md:min-h-0 md:max-h-[85dvh]">
           <ChatInterface key={resetKey} enabled={files.length > 0} uploadId={uploadId} />
         </div>
 
       </div>
     </main>
+  )
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<main className="min-h-dvh bg-[#111112]" />}>
+      <Home />
+    </Suspense>
   )
 }

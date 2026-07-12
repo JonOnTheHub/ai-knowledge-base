@@ -27,11 +27,15 @@ export default function UploadZone({ onUpdate, uploadId, currentSize, files }: U
 
     const remaining = MAX_COMBINED_SIZE - currentSize
     const remainingMB = (remaining / (1024 * 1024)).toFixed(1)
+    const ALLOWED_TYPES = [
+        'application/pdf',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ]
 
     const handleFiles = async (fileList: FileList) => {
         const incoming = Array.from(fileList)
-        const nonPdf = incoming.find(f => f.type !== 'application/pdf')
-        if (nonPdf) { setError(`${nonPdf.name} is not a PDF`); return }
+        const invalid = incoming.find(f => !ALLOWED_TYPES.includes(f.type))
+        if (invalid) { setError(`${invalid.name} must be a PDF or DOCX`); return }
 
         const incomingSize = incoming.reduce((sum, f) => sum + f.size, 0)
         if (currentSize + incomingSize > MAX_COMBINED_SIZE) {
@@ -149,7 +153,7 @@ export default function UploadZone({ onUpdate, uploadId, currentSize, files }: U
                     <input
                         ref={inputRef}
                         type="file"
-                        accept="application/pdf"
+                        accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                         multiple
                         className="hidden"
                         onChange={(e) => { if (e.target.files?.length) handleFiles(e.target.files) }}
@@ -169,7 +173,7 @@ export default function UploadZone({ onUpdate, uploadId, currentSize, files }: U
                         <>
                             <CloudArrowUp size={24} weight="thin" className={dragging ? 'text-zinc-400' : 'text-zinc-700'} />
                             <p className="text-xs font-medium text-zinc-400">
-                                {files.length > 0 ? 'Add more PDFs' : 'Drop PDFs or click to browse'}
+                                {files.length > 0 ? 'Add more files' : 'Drop PDFs/DOCX or click to browse'}
                             </p>
                             <p className="text-[11px] text-zinc-600">{remainingMB}MB remaining · combined limit 10MB</p>
                         </>
