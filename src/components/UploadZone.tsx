@@ -17,7 +17,7 @@ interface UploadZoneProps {
 
 type UploadState = 'idle' | 'uploading' | 'error'
 
-const MAX_COMBINED_SIZE = 10 * 1024 * 1024
+const MAX_COMBINED_SIZE = 4 * 1024 * 1024
 
 export default function UploadZone({ onUpdate, uploadId, currentSize, files }: UploadZoneProps) {
     const [state, setState] = useState<UploadState>('idle')
@@ -175,8 +175,7 @@ export default function UploadZone({ onUpdate, uploadId, currentSize, files }: U
                             <p className="text-xs font-medium text-zinc-400">
                                 {files.length > 0 ? 'Add more files' : 'Drop PDFs/DOCX or click to browse'}
                             </p>
-                            <p className="text-[11px] text-zinc-600">{remainingMB}MB remaining · combined limit 10MB</p>
-                        </>
+                            <p className="text-[11px] text-zinc-600">{remainingMB}MB remaining · combined limit 4MB</p>                        </>
                     )}
                 </div>
             )}

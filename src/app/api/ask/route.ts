@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
         const { data: chunks, error } = await supabase.rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_count: 5,
+            match_count: 12, 
             filter_upload_id: uploadId ?? null,
         })
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         }))
 
         const systemPrompt = context
-  ? `You are a precise, helpful, and conversational assistant that answers questions exclusively about the provided documents.
+            ? `You are a precise, helpful, and conversational assistant that answers questions exclusively about the provided documents.
 
 Core Rules (follow strictly in this order of priority):
 1. Ground every answer ONLY in the "Document Context" section below. Never use external knowledge, assumptions, or your pre-training data.
@@ -59,7 +59,7 @@ Additional Guidelines:
 
 Document Context:
 ${context}`
-  : `You are a helpful assistant for a document knowledge base.
+            : `You are a helpful assistant for a document knowledge base.
 
 No relevant information for this question was found in the uploaded documents.
 
