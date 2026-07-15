@@ -1,41 +1,65 @@
 # PaperBase
 
-Upload PDFs. Ask anything about it. Get answers grounded in the documents with sources cited.
+Turn your documents into a private AI assistant. Upload PDFs or Word docs, ask questions in plain language, get answers grounded in your own files — with sources cited, nothing hallucinated.
 
-Built without LangChain — every layer of the RAG pipeline is hand-rolled.
+Built without LangChain. Every layer of the pipeline is hand-rolled.
 
 🔗 **Live:** https://paper-base.vercel.app
 
+---
+
 ## How It Works
 
-1. Upload PDFs → text extracted and split into 500-word chunks (50-word overlap)
-2. Each chunk converted into a vector via Voyage AI embeddings (512 dims)
-3. Vectors stored in Supabase with pgvector
-4. Ask a question → question vectorised the same way
-5. Cosine similarity search retrieves the 5 most relevant chunks
-6. Chunks + conversation history passed to Groq LLaMA 3.3 70b
-7. Answer streamed token by token with source citations shown
-8. On reset, all chunks deleted from Supabase — nothing persists
+1. Upload one or more PDFs/DOCX files (combined 10MB per knowledge base)
+2. Text extracted, split into 500-word chunks with overlap for context continuity
+3. Each chunk converted to a vector via Voyage AI embeddings
+4. Vectors stored in Supabase with pgvector — permanently, tied to a unique link
+5. Ask a question → question vectorised the same way
+6. Cosine similarity search retrieves the most relevant chunks across all uploaded documents
+7. Chunks + conversation history passed to Groq LLaMA 3.3 70b
+8. Answer rendered word by word, with source chunks and similarity scores available on demand
+9. Bookmark the link (`?kb=<id>`) to return to the same knowledge base anytime — nothing is lost on refresh
+
+---
+
+## What Makes This Different From "Just ChatGPT with a PDF"
+
+- **Multi-document synthesis** — ask a question spanning multiple files, and it combines and attributes the answer across sources
+- **Conflict detection** — if two documents disagree, it tells you, instead of silently picking one
+- **Persistent, shareable knowledge bases** — no login, no re-uploading; the link is the access key
+- **Nothing invented** — answers are grounded strictly in what you uploaded, not the model's training data
+
+---
 
 ## Stack
 
-- **Next.js 16** — App Router, API routes
-- **Voyage AI** — `voyage-3-lite` embeddings, 512 dims
-- **Supabase + pgvector** — vector storage, cosine similarity search
-- **Groq** — LLaMA 3.3 70b, SSE streaming
-- **TypeScript** throughout
+| Layer | Tool |
+|---|---|
+| Framework | Next.js 16 App Router |
+| Embeddings | Voyage AI `voyage-3-lite` (512 dims) |
+| Vector DB | Supabase + pgvector |
+| LLM | Groq LLaMA 3.3 70b |
+| Document parsing | `unpdf` (PDF), `mammoth` (DOCX) |
+| Rendering | react-markdown + Tailwind typography |
+| Language | TypeScript throughout |
+
+---
 
 ## Features
 
-- Streaming responses via SSE
-- Conversation history — follow-up questions work
-- Source citations with similarity scores
-- Markdown formatted answers
-- Per-upload isolation — queries scoped to active document only
-- Automatic cleanup — chunks deleted from DB on session reset
-- File guards — PDF only, 10MB max
+- Multi-file upload (PDF + DOCX, mixed), combined 10MB cap
+- Persistent sessions via shareable URL — survives refresh, revisit, sharing
+- Multi-document synthesis with cross-document attribution
+- Conflict detection between documents
+- Conversation history — follow-up questions retain context
+- Source citations with similarity scores, shown in a modal to keep answers clean
+- Word-by-word rendered answers
+- Per-file removal or full session clear, with actual deletion from the database
+- File guards — type validation, combined size cap, empty-document detection
 - Retry logic with exponential backoff on embedding failures
 - Batched inserts for large documents
+
+---
 
 ## Local Setup
 
@@ -55,12 +79,20 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Run the Supabase SQL in `/supabase/schema.sql`, then:
+Run `/supabase/schema.sql` in your Supabase SQL editor, then:
 
 ```bash
 npm run dev
 ```
 
+---
+
+## Who This Is For
+
+Built for businesses sitting on document-heavy workflows — contracts, policies, case files, invoices, SOPs — where staff waste time re-reading the same files to answer routine questions. No enterprise RAG platform, no six-figure implementation. A private, working system in days.
+
+---
+
 ## What I Learned
 
-Built as a learning project to understand RAG pipelines from first principles. Every component implemented manually — chunking strategy, embedding pipeline, vector search, SSE streaming, history management, and stream parsing. No LangChain, no abstractions hiding the plumbing.
+Built as a learning project to understand RAG pipelines from first principles, then extended into a real productized offer. Every component implemented manually — chunking, embedding, vector search, multi-document retrieval, prompt engineering for synthesis and conflict detection, persistent session architecture. No LangChain, no abstractions hiding the plumbing.

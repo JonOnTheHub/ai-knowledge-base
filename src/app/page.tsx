@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import UploadZone from '@/components/UploadZone'
 import ChatInterface from '@/components/ChatInterface'
+import Footer from '@/components/Footer'
 
 interface IndexedFile {
   filename: string
@@ -60,7 +61,7 @@ function Home() {
   }
 
   return (
-    <main className="min-h-dvh bg-[#111112] flex items-center justify-center p-4 md:p-8">
+    <main className="min-h-dvh bg-[#111112] flex flex-col items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-[340px_1fr] gap-4 md:gap-6 md:items-stretch max-h-[85dvh]">
 
         <div className="flex flex-col gap-7 overflow-y-auto md:max-h-[85dvh] pr-1">
@@ -115,6 +116,7 @@ function Home() {
         </div>
 
       </div>
+      <Footer />
     </main>
   )
 }
