@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
         const { data: chunks, error } = await supabase.rpc('match_documents', {
             query_embedding: queryEmbedding,
-            match_count: 12, 
+            match_count: 8,
             filter_upload_id: uploadId ?? null,
         })
 
@@ -32,10 +32,12 @@ export async function POST(req: NextRequest) {
             ? chunks.map((c: { chunk_text: string }, i: number) => `[Chunk ${i + 1}]:\n${c.chunk_text}`).join('\n\n')
             : null
 
-        const priorMessages = (history ?? []).map((m: { role: string; content: string }) => ({
-            role: m.role as 'user' | 'assistant',
-            content: m.content,
-        }))
+        const priorMessages = (history ?? [])
+            .slice(-6) 
+            .map((m: { role: string; content: string }) => ({
+                role: m.role as 'user' | 'assistant',
+                content: m.content,
+            }))
 
         const systemPrompt = context
             ? `You are a precise, helpful, and conversational assistant that answers questions exclusively about the provided documents.
@@ -80,8 +82,17 @@ Respond conversationally: clearly tell the user that the documents do not contai
         return NextResponse.json({ answer, sources })
 
     } catch (err) {
-        const message = err instanceof Error ? err.message : 'Query failed'
-        console.error('[ask]', message)
-        return NextResponse.json({ error: message }, { status: 500 })
-    }
+  const message = err instanceof Error ? err.message : 'Query failed'
+  const isRateLimit = message.includes('rate_limit_exceeded') || message.includes('tokens per minute')
+
+  console.error('[ask]', message)
+
+  return NextResponse.json(
+    { error: isRateLimit
+        ? 'That question needs more context than the current plan allows. Try asking something more specific.'
+        : 'Query failed'
+    },
+    { status: isRateLimit ? 413 : 500 }
+  )
+}
 }
