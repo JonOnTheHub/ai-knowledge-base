@@ -95,7 +95,7 @@ function Home() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-zinc-500">LLM</span>
-                  <span className="text-xs text-zinc-300 font-medium">llama-3.3-70b · Groq</span>
+                  <span className="text-xs text-zinc-300 font-medium">llama-3.3-70b-specdec · Groq</span>
                 </div>
               </div>
 

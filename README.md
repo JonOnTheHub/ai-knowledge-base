@@ -16,7 +16,7 @@ Built without LangChain. Every layer of the pipeline is hand-rolled.
 4. Vectors stored in Supabase with pgvector — permanently, tied to a unique link
 5. Ask a question → question vectorised the same way
 6. Cosine similarity search retrieves the most relevant chunks across all uploaded documents
-7. Chunks + conversation history passed to Groq LLaMA 3.3 70b
+7. Chunks + conversation history passed to Groq  llama-3.1-70b-specdec
 8. Answer rendered word by word, with source chunks and similarity scores available on demand
 9. Bookmark the link (`?kb=<id>`) to return to the same knowledge base anytime — nothing is lost on refresh
 
@@ -38,7 +38,7 @@ Built without LangChain. Every layer of the pipeline is hand-rolled.
 | Framework | Next.js 16 App Router |
 | Embeddings | Voyage AI `voyage-3-lite` (512 dims) |
 | Vector DB | Supabase + pgvector |
-| LLM | Groq LLaMA 3.3 70b |
+| LLM | Groq LLaMA 3.3 70b specdec | 
 | Document parsing | `unpdf` (PDF), `mammoth` (DOCX) |
 | Rendering | react-markdown + Tailwind typography |
 | Language | TypeScript throughout |
